@@ -35,6 +35,10 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -299,6 +303,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void grayScale() {
+        //Bitmap srcBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mock_img);
+        Bitmap srcBitmap = BitmapUtil.getViewBitmap(ivImg);
+        if (srcBitmap != null) {
+            OpenCVLoader.initDebug();
+            Mat rgbMat = new Mat();
+            Mat grayMat = new Mat();
+            Bitmap grayBitmap = Bitmap.createBitmap(srcBitmap.getWidth(), srcBitmap.getHeight(), Bitmap.Config.RGB_565);
+            Utils.bitmapToMat(srcBitmap, rgbMat);//convert original bitmap to Mat, R G B.
+            Imgproc.cvtColor(rgbMat, grayMat, Imgproc.COLOR_RGB2GRAY);//rgbMat to gray grayMat
+            Utils.matToBitmap(grayMat, grayBitmap); //convert mat to bitmap
+            ivImg.setImageBitmap(grayBitmap);
+        } else {
+            Toast.makeText(mContext, "cannot get bitmap", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_gray})
     public void onClick(View view) {
         switch (view.getId()) {
@@ -309,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
                 detectFace();
                 break;
             case R.id.btn_gray:
+                grayScale();
                 break;
         }
     }
