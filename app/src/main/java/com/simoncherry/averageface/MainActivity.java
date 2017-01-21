@@ -35,10 +35,6 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,8 +50,14 @@ public class MainActivity extends AppCompatActivity {
     ImageView ivImg;
     @ViewById(R.id.btn_detect)
     Button btnDetect;
+    @ViewById(R.id.btn_reset)
+    Button btnReset;
     @ViewById(R.id.btn_gray)
     Button btnGray;
+    @ViewById(R.id.btn_binary)
+    Button btnBinary;
+    @ViewById(R.id.btn_edge)
+    Button btnEdge;
 
     private Context mContext;
     //private Unbinder unbinder;
@@ -84,17 +86,18 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == FILE_REQUEST_CODE) {
                 Uri uri = data.getData();
-                mImgPath = FileUtil.getFileAbsolutePath(this, uri);
-                if (mImgPath != null) {
-                    File file = new File(mImgPath);
-                    Picasso.with(mContext).load(file)
-                            .fit().centerCrop()
-                            .into(ivImg);
-
-                    //runDetectAsync(path);
-                } else {
-                    Toast.makeText(mContext, "Image Path is null", Toast.LENGTH_SHORT).show();
-                }
+                mImgPath = FileUtils.getFileAbsolutePath(this, uri);
+//                if (mImgPath != null) {
+//                    File file = new File(mImgPath);
+//                    Picasso.with(mContext).load(file)
+//                            .fit().centerCrop()
+//                            .into(ivImg);
+//
+//                    //runDetectAsync(path);
+//                } else {
+//                    Toast.makeText(mContext, "Image Path is null", Toast.LENGTH_SHORT).show();
+//                }
+                showOriginalImage();
             }
         }
     }
@@ -108,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void detectFace() {
         if (mImgPath != null) {
-            String fileName = FileUtil.getMD5(mImgPath) + ".txt";
-            String json = FileUtil.readFileData(mContext, fileName);
+            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
+            String json = FileUtils.readFileData(mContext, fileName);
             if (json != null && !TextUtils.isEmpty(json)) {
                 Toast.makeText(mContext, "This image had already detected", Toast.LENGTH_SHORT).show();
                 Logger.t(TAG).e("get json file: " + json);
@@ -147,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Copy landmark model to " + targetPath, Toast.LENGTH_SHORT).show();
                 }
             });
-            FileUtil.copyFileFromRawToOthers(getApplicationContext(), R.raw.shape_predictor_68_face_landmarks, targetPath);
+            FileUtils.copyFileFromRawToOthers(getApplicationContext(), R.raw.shape_predictor_68_face_landmarks, targetPath);
         }
         // Init
         if (mFaceDet == null) {
@@ -228,8 +231,8 @@ public class MainActivity extends AppCompatActivity {
             //Logger.t(TAG).e("landmarks: " + landmarks.toString());
             String jsonString = JSON.toJSONString(landmarks);
             Logger.t(TAG).e("landmarks: " + jsonString);
-            String fileName = FileUtil.getMD5(mImgPath) + ".txt";
-            FileUtil.writeFileData(mContext, fileName, jsonString);
+            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
+            FileUtils.writeFileData(mContext, fileName, jsonString);
 
             for (Point point : landmarks) {
                 int pointX = (int) (point.x * resizeRatio);
@@ -287,8 +290,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bm, newWidth, newHeight, true);
-        return resizedBitmap;
+        return Bitmap.createScaledBitmap(bm, newWidth, newHeight, true);
     }
 
     @UiThread
@@ -303,24 +305,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void grayScale() {
-        //Bitmap srcBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mock_img);
-        Bitmap srcBitmap = BitmapUtil.getViewBitmap(ivImg);
-        if (srcBitmap != null) {
-            OpenCVLoader.initDebug();
-            Mat rgbMat = new Mat();
-            Mat grayMat = new Mat();
-            Bitmap grayBitmap = Bitmap.createBitmap(srcBitmap.getWidth(), srcBitmap.getHeight(), Bitmap.Config.RGB_565);
-            Utils.bitmapToMat(srcBitmap, rgbMat);//convert original bitmap to Mat, R G B.
-            Imgproc.cvtColor(rgbMat, grayMat, Imgproc.COLOR_RGB2GRAY);//rgbMat to gray grayMat
-            Utils.matToBitmap(grayMat, grayBitmap); //convert mat to bitmap
-            ivImg.setImageBitmap(grayBitmap);
+    private void showProcessResult(int[] resultPixes, int w, int h) {
+        Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+        result.setPixels(resultPixes, 0, w, 0, 0,w, h);
+        ivImg.setImageBitmap(result);
+    }
+
+    private void showOriginalImage() {
+        if (mImgPath != null) {
+            File file = new File(mImgPath);
+            Picasso.with(mContext).load(file)
+                    .fit().centerCrop()
+                    .into(ivImg);
         } else {
-            Toast.makeText(mContext, "cannot get bitmap", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Image Path is null", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_gray})
+    private void doGrayScale() {
+        Bitmap bitmap = BitmapUtils.getViewBitmap(ivImg);
+        int w = bitmap.getWidth(), h = bitmap.getHeight();
+        int[] pix = new int[w * h];
+        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+
+        int [] resultPixes = JNIUtils.doGrayScale(pix, w, h);
+        showProcessResult(resultPixes, w, h);
+    }
+
+    private void doEdgeDetection() {
+        Bitmap bitmap = BitmapUtils.getViewBitmap(ivImg);
+        int w = bitmap.getWidth(), h = bitmap.getHeight();
+        int[] pix = new int[w * h];
+        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+
+        int [] resultPixes = JNIUtils.doEdgeDetection(pix, w, h);
+        showProcessResult(resultPixes, w, h);
+    }
+
+    private void doBinaryzation() {
+        Bitmap bitmap = BitmapUtils.getViewBitmap(ivImg);
+        int w = bitmap.getWidth(), h = bitmap.getHeight();
+        int[] pix = new int[w * h];
+        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+
+        int [] resultPixes = JNIUtils.doBinaryzation(pix, w, h);
+        showProcessResult(resultPixes, w, h);
+    }
+
+    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_img:
@@ -329,8 +361,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btn_detect:
                 detectFace();
                 break;
+            case R.id.btn_reset:
+                showOriginalImage();
+                break;
             case R.id.btn_gray:
-                grayScale();
+                doGrayScale();
+                break;
+            case R.id.btn_binary:
+                doBinaryzation();
+                break;
+            case R.id.btn_edge:
+                doEdgeDetection();
                 break;
         }
     }

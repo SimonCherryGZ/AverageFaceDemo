@@ -2,19 +2,19 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-
 OpenCV_INSTALL_MODULES := on
 OpenCV_CAMERA_MODULES := off
 
-OPENCV_LIB_TYPE := SHARED
+OPENCV_LIB_TYPE :=STATIC
 
 ifeq ("$(wildcard $(OPENCV_MK_PATH))","")
-include ..\..\..\..\native\jni\OpenCV.mk
+include D:\Simon\Works\Android\Git\AverageFace\native\jni\OpenCV.mk
 else
 include $(OPENCV_MK_PATH)
 endif
 
-LOCAL_MODULE := OpenCV
+LOCAL_MODULE := JNI_APP
+LOCAL_SRC_FILES =: jni_app.cpp
 
 LOCAL_LDLIBS +=  -lm -llog
 

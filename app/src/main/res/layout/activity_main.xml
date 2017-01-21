@@ -12,14 +12,15 @@
 
     <ImageView
         android:id="@+id/iv_img"
-        android:layout_width="300dp"
-        android:layout_height="360dp"
+        android:layout_width="240dp"
+        android:layout_height="320dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/mock_img" />
+        android:src="@drawable/add_icon" />
 
     <LinearLayout
+        android:id="@+id/layout_btn_top"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_centerHorizontal="true"
@@ -34,11 +35,41 @@
             android:text="Detect"/>
 
         <Button
+            android:id="@+id/btn_reset"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Reset"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_btn_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/layout_btn_top"
+        android:layout_marginTop="3dp">
+
+        <Button
             android:id="@+id/btn_gray"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="GRAY"/>
+
+        <Button
+            android:id="@+id/btn_binary"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="BINARY"/>
+
+        <Button
+            android:id="@+id/btn_edge"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="EDGE"/>
     </LinearLayout>
 
 </RelativeLayout>
