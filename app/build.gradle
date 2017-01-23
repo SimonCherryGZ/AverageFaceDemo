@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
 
@@ -13,10 +15,8 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk{
             moduleName "JNI_APP"
+            //ldLibs "jsoncpp"//新增
             abiFilters "armeabi", "armeabi-v7a"
-        }
-        sourceSets.main{
-            jniLibs.srcDirs = ['src/main/libs']
         }
     }
     buildTypes {
@@ -31,6 +31,41 @@ android {
         }
     }
     useLibrary 'org.apache.http.legacy'
+
+    sourceSets.main.jni.srcDirs = []
+    //禁止自带的ndk功能
+    sourceSets.main.jniLibs.srcDirs = ['src/main/libs','src/main/jniLibs']
+    //重定向so目录为src/main/libs，原来为src/main/jniLibs
+
+    task ndkBuild(type: Exec, description: 'Compile JNI source with NDK') {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        def ndkDir = properties.getProperty('ndk.dir')
+
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            commandLine "$ndkDir/ndk-build.cmd", '-C', file('src/main/jni').absolutePath
+        } else {
+            commandLine "$ndkDir/ndk-build", '-C', file('src/main/jni').absolutePath
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn ndkBuild
+    }
+
+    task ndkClean(type: Exec, description: 'Clean NDK Binaries') {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        def ndkDir = properties.getProperty('ndk.dir')
+
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            commandLine "$ndkDir/ndk-build.cmd",'clean', '-C', file('src/main/jni').absolutePath
+        } else {
+            commandLine "$ndkDir/ndk-build",'clean', '-C', file('src/main/jni').absolutePath
+        }
+    }
+
+    clean.dependsOn 'ndkClean'
 }
 
 def AAVersion = '4.0.0'

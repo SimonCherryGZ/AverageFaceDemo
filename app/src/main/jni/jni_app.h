@@ -31,6 +31,14 @@ JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doEdgeDete
 JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doBinaryzation
   (JNIEnv *, jclass, jintArray, jint, jint);
 
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    testParseJson
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_simoncherry_averageface_JNIUtils_testParseJson
+(JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

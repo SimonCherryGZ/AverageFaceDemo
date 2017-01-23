@@ -7,6 +7,7 @@ package com.simoncherry.averageface;
 public class JNIUtils {
 
     static {
+        System.loadLibrary("jsoncpp");
         System.loadLibrary("JNI_APP");
     }
 
@@ -15,4 +16,6 @@ public class JNIUtils {
     public static native int[] doEdgeDetection(int[] buf, int w, int h);
 
     public static native int[] doBinaryzation(int[] buf, int w, int h);
+
+    public static native void testParseJson(String str);
 }

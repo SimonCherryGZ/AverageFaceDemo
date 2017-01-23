@@ -23,7 +23,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.tzutalin.dlib.Constants;
@@ -116,14 +116,20 @@ public class MainActivity extends AppCompatActivity {
             if (json != null && !TextUtils.isEmpty(json)) {
                 Toast.makeText(mContext, "This image had already detected", Toast.LENGTH_SHORT).show();
                 Logger.t(TAG).e("get json file: " + json);
+                JNIUtils.testParseJson(json);
                 try {
-                    final ArrayList<Point> landmarks = (ArrayList<Point>) JSONArray.parseArray(json, Point.class);
-                    Logger.t(TAG).e("get landmarks: " + landmarks.toString());
+                    //final ArrayList<Point> landmarks = (ArrayList<Point>) JSONArray.parseArray(json, Point.class);
+                    //final ArrayList<Landmark> landmarks = (ArrayList<Landmark>) JSONArray.parseArray(json, Landmark.class);
+                    //final List<Landmark> mLandmarks = JSON.parseArray(json, Landmark.class);
+                    JSONObject jsonObject = JSON.parseObject(json);
+                    final List<Landmark> mLandmarks = JSON.parseArray(jsonObject.getString("landmark"), Landmark.class);
+                    Logger.t(TAG).e("get landmarks: " + mLandmarks.toString());
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ivImg.setImageDrawable(drawRect(mImgPath, landmarks, Color.GREEN));
+                            //ivImg.setImageDrawable(drawRect(mImgPath, landmarks, Color.GREEN));
+                            ivImg.setImageDrawable(drawRectWithLandmark(mImgPath, mLandmarks, Color.GREEN));
                         }
                     });
 
@@ -228,23 +234,82 @@ public class MainActivity extends AppCompatActivity {
             }
             // Get landmark
             ArrayList<Point> landmarks = ret.getFaceLandmarks();
-            //Logger.t(TAG).e("landmarks: " + landmarks.toString());
             String jsonString = JSON.toJSONString(landmarks);
             Logger.t(TAG).e("landmarks: " + jsonString);
-            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
-            FileUtils.writeFileData(mContext, fileName, jsonString);
+            JNIUtils.testParseJson(jsonString);
 
+            //String fileName = FileUtils.getMD5(mImgPath) + ".txt";
+            //FileUtils.writeFileData(mContext, fileName, jsonString);
+
+            List<Landmark> mLandmarks = new ArrayList<>();
             for (Point point : landmarks) {
                 int pointX = (int) (point.x * resizeRatio);
                 int pointY = (int) (point.y * resizeRatio);
                 canvas.drawCircle(pointX, pointY, 2, paint);
+
+                Landmark landmark = new Landmark();
+                landmark.setX(pointX);
+                landmark.setY(pointY);
+                mLandmarks.add(landmark);
             }
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("landmark", mLandmarks);
+            jsonString = jsonObject.toJSONString();
+            Logger.t(TAG).e("new landmarks: " + jsonString);
+            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
+            FileUtils.writeFileData(mContext, fileName, jsonString);
         }
 
         return new BitmapDrawable(getResources(), bm);
     }
 
-    protected BitmapDrawable drawRect(String path, ArrayList<Point> landmarks, int color) {
+//    protected BitmapDrawable drawRect(String path, ArrayList<Point> landmarks, int color) {
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inSampleSize = 1;
+//        Bitmap bm = BitmapFactory.decodeFile(path, options);
+//        android.graphics.Bitmap.Config bitmapConfig = bm.getConfig();
+//        // set default bitmap config if none
+//        if (bitmapConfig == null) {
+//            bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
+//        }
+//        // resource bitmaps are imutable,
+//        // so we need to convert it to mutable one
+//        bm = bm.copy(bitmapConfig, true);
+//        int width = bm.getWidth();
+//        int height = bm.getHeight();
+//        // By ratio scale
+//        float aspectRatio = bm.getWidth() / (float) bm.getHeight();
+//
+//        final int MAX_SIZE = 512;
+//        int newWidth = MAX_SIZE;
+//        int newHeight = MAX_SIZE;
+//        float resizeRatio = 1;
+//        newHeight = Math.round(newWidth / aspectRatio);
+//        if (bm.getWidth() > MAX_SIZE && bm.getHeight() > MAX_SIZE) {
+//            Log.d(TAG, "Resize Bitmap");
+//            bm = getResizedBitmap(bm, newWidth, newHeight);
+//            resizeRatio = (float) bm.getWidth() / (float) width;
+//            Log.d(TAG, "resizeRatio " + resizeRatio);
+//        }
+//
+//        // Create canvas to draw
+//        Canvas canvas = new Canvas(bm);
+//        Paint paint = new Paint();
+//        paint.setColor(color);
+//        paint.setStrokeWidth(2);
+//        paint.setStyle(Paint.Style.STROKE);
+//
+//        for (Point point : landmarks) {
+//            int pointX = (int) (point.x * resizeRatio);
+//            int pointY = (int) (point.y * resizeRatio);
+//            canvas.drawCircle(pointX, pointY, 2, paint);
+//        }
+//
+//        return new BitmapDrawable(getResources(), bm);
+//    }
+
+    protected BitmapDrawable drawRectWithLandmark(String path, List<Landmark> landmarks, int color) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
         Bitmap bm = BitmapFactory.decodeFile(path, options);
@@ -280,9 +345,9 @@ public class MainActivity extends AppCompatActivity {
         paint.setStrokeWidth(2);
         paint.setStyle(Paint.Style.STROKE);
 
-        for (Point point : landmarks) {
-            int pointX = (int) (point.x * resizeRatio);
-            int pointY = (int) (point.y * resizeRatio);
+        for (Landmark point : landmarks) {
+            int pointX = (int) (point.getX() * resizeRatio);
+            int pointY = (int) (point.getY() * resizeRatio);
             canvas.drawCircle(pointX, pointY, 2, paint);
         }
 
