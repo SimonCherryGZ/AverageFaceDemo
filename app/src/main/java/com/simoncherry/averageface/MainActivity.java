@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.tzutalin.dlib.Constants;
@@ -37,7 +35,11 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,17 +116,54 @@ public class MainActivity extends AppCompatActivity {
 
     private void detectFace() {
         if (mImgPath != null) {
-            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
-            String json = FileUtils.readFileData(mContext, fileName);
-            if (json != null && !TextUtils.isEmpty(json)) {
-                Toast.makeText(mContext, "This image had already detected", Toast.LENGTH_SHORT).show();
-                Logger.t(TAG).e("get json file: " + json);
-                //JNIUtils.testParseJson(json);
+//            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
+            String fileName = getFilesDir().getAbsolutePath() + "/" + FileUtils.getMD5(mImgPath) + ".txt";
+//            String json = FileUtils.readFileData(mContext, fileName);
+//            if (json != null && !TextUtils.isEmpty(json)) {
+//                Toast.makeText(mContext, "This image had already detected", Toast.LENGTH_SHORT).show();
+//                Logger.t(TAG).e("get json file: " + json);
+//                //JNIUtils.testParseJson(json);
+//                try {
+//                    JSONObject jsonObject = JSON.parseObject(json);
+//                    final List<Landmark> mLandmarks = JSON.parseArray(jsonObject.getString("landmark"), Landmark.class);
+//                    Logger.t(TAG).e("get landmarks: " + mLandmarks.toString());
+//
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            //ivImg.setImageDrawable(drawRect(mImgPath, landmarks, Color.GREEN));
+//                            ivImg.setImageDrawable(drawRectWithLandmark(mImgPath, mLandmarks, Color.GREEN));
+//                        }
+//                    });
+//
+//                } catch (Exception e) {
+//                    Logger.t(TAG).e(e.toString());
+//                }
+//            } else {
+//                runDetectAsync(mImgPath);
+//            }
+            File file = new File(fileName);
+            if (file.exists()) {
                 try {
-                    JSONObject jsonObject = JSON.parseObject(json);
-                    final List<Landmark> mLandmarks = JSON.parseArray(jsonObject.getString("landmark"), Landmark.class);
-                    Logger.t(TAG).e("get landmarks: " + mLandmarks.toString());
+                    FileReader fileReader = new FileReader(fileName);
+                    BufferedReader br = new BufferedReader(fileReader);
+                    final List<Landmark> mLandmarks = new ArrayList<>();
+                    int i = 0;
+                    for(String str; (str = br.readLine()) != null; ) {  // 这里不能用while(br.readLine()) != null) 因为循环条件已经读了一条
+                        Logger.t(TAG).e("read landmark[" + String.valueOf(i) + "]: " + str);
+                        i++;
+                        String[] strArray = str.split(" ");
+                        //Logger.t(TAG).e("get x: " + strArray[0]);
+                        //Logger.t(TAG).e("get y: " + strArray[1]);
+                        Landmark landmark = new Landmark();
+                        landmark.setX(Integer.parseInt(strArray[0]));
+                        landmark.setY(Integer.parseInt(strArray[1]));
+                        mLandmarks.add(landmark);
+                    }
+                    br.close();
 
+                    Toast.makeText(mContext, "This image had already detected", Toast.LENGTH_SHORT).show();
+                    Logger.t(TAG).e("get landmarks: " + mLandmarks.toString());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -134,11 +173,14 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                 } catch (Exception e) {
+                    e.printStackTrace();
                     Logger.t(TAG).e(e.toString());
                 }
             } else {
+                //Toast.makeText(mContext, "cannot read landmarks txt", Toast.LENGTH_SHORT).show();
                 runDetectAsync(mImgPath);
             }
+
         } else {
             Toast.makeText(mContext, "Image path is null, cannot detect face", Toast.LENGTH_SHORT).show();
         }
@@ -239,27 +281,45 @@ public class MainActivity extends AppCompatActivity {
 
             //JNIUtils.testParseJson(jsonString);
 
-            //String fileName = FileUtils.getMD5(mImgPath) + ".txt";
-            //FileUtils.writeFileData(mContext, fileName, jsonString);
+//            List<Landmark> mLandmarks = new ArrayList<>();
+//            for (Point point : landmarks) {
+//                int pointX = (int) (point.x * resizeRatio);
+//                int pointY = (int) (point.y * resizeRatio);
+//                canvas.drawCircle(pointX, pointY, 2, paint);
+//
+//                Landmark landmark = new Landmark();
+//                landmark.setX(pointX);
+//                landmark.setY(pointY);
+//                mLandmarks.add(landmark);
+//            }
+//
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("landmark", mLandmarks);
+//            jsonString = jsonObject.toJSONString();
+//            Logger.t(TAG).e("new landmarks: " + jsonString);
+//            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
+//            FileUtils.writeFileData(mContext, fileName, jsonString);
 
-            List<Landmark> mLandmarks = new ArrayList<>();
-            for (Point point : landmarks) {
-                int pointX = (int) (point.x * resizeRatio);
-                int pointY = (int) (point.y * resizeRatio);
-                canvas.drawCircle(pointX, pointY, 2, paint);
+            String fileName = getFilesDir().getAbsolutePath() + "/" + FileUtils.getMD5(mImgPath) + ".txt";
+            try {
+                int i = 0;
+                FileWriter writer = new FileWriter(fileName);
+                for (Point point : landmarks) {
+                    int pointX = (int) (point.x * resizeRatio);
+                    int pointY = (int) (point.y * resizeRatio);
+                    canvas.drawCircle(pointX, pointY, 2, paint);
 
-                Landmark landmark = new Landmark();
-                landmark.setX(pointX);
-                landmark.setY(pointY);
-                mLandmarks.add(landmark);
+                    String landmark = String.valueOf(pointX) + " " + String.valueOf(pointY) + "\n";
+                    Logger.t(TAG).e("write landmark[" + String.valueOf(i) + "]: " + landmark);
+                    i++;
+                    writer.write(landmark);
+                }
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Logger.t(TAG).e(e.toString());
             }
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("landmark", mLandmarks);
-            jsonString = jsonObject.toJSONString();
-            Logger.t(TAG).e("new landmarks: " + jsonString);
-            String fileName = FileUtils.getMD5(mImgPath) + ".txt";
-            FileUtils.writeFileData(mContext, fileName, jsonString);
         }
 
         return new BitmapDrawable(getResources(), bm);
