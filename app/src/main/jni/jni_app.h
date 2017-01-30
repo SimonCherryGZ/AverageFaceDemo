@@ -39,6 +39,22 @@ JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doBinaryza
 JNIEXPORT void JNICALL Java_com_simoncherry_averageface_JNIUtils_testParseJson
 (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    testReadFile
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_simoncherry_averageface_JNIUtils_testReadFile
+(JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    averageFaceTest
+ * Signature: (Ljava/lang/String;)[I
+ */
+JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_averageFaceTest
+        (JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

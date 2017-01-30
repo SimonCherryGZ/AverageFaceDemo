@@ -1,4 +1,6 @@
 ./obj/local/armeabi-v7a/objs/JNI_APP/jni_app.o: jni/jni_app.cpp \
+  D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iostream \
+  D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\fstream \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/opencv.hpp \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/opencv_modules.hpp \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/core.hpp \
@@ -12,7 +14,6 @@
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/core/cvstd.hpp \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cstring \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cctype \
-  D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\string \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cstdlib \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cmath \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/core/ptr.inl.hpp \
@@ -54,7 +55,6 @@
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/flann/any.h \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stdexcept \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\typeinfo \
-  D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iostream \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\map \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/flann/saving.h \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/flann/nn_index.h \
@@ -129,7 +129,6 @@
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/stabilizer.hpp \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\ctime \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/global_motion.hpp \
-  D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\fstream \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/optical_flow.hpp \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/motion_core.hpp \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/outlier_rejection.hpp \
@@ -144,6 +143,10 @@
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/ring_buffer.hpp \
   jni/jni_app.h jni/json/json.h \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stack
+
+D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iostream:
+
+D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\fstream:
 
 D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/opencv.hpp:
 
@@ -170,8 +173,6 @@ D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/core/cvstd.hpp
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cstring:
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cctype:
-
-D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\string:
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cstdlib:
 
@@ -254,8 +255,6 @@ D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/flann/any.h:
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stdexcept:
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\typeinfo:
-
-D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iostream:
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\map:
 
@@ -404,8 +403,6 @@ D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/stab
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\ctime:
 
 D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/global_motion.hpp:
-
-D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\fstream:
 
 D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/optical_flow.hpp:
 

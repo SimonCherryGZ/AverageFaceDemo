@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnBinary;
     @ViewById(R.id.btn_edge)
     Button btnEdge;
+    @ViewById(R.id.btn_file)
+    Button btnFile;
 
     private Context mContext;
     //private Unbinder unbinder;
@@ -116,11 +119,8 @@ public class MainActivity extends AppCompatActivity {
             if (json != null && !TextUtils.isEmpty(json)) {
                 Toast.makeText(mContext, "This image had already detected", Toast.LENGTH_SHORT).show();
                 Logger.t(TAG).e("get json file: " + json);
-                JNIUtils.testParseJson(json);
+                //JNIUtils.testParseJson(json);
                 try {
-                    //final ArrayList<Point> landmarks = (ArrayList<Point>) JSONArray.parseArray(json, Point.class);
-                    //final ArrayList<Landmark> landmarks = (ArrayList<Landmark>) JSONArray.parseArray(json, Landmark.class);
-                    //final List<Landmark> mLandmarks = JSON.parseArray(json, Landmark.class);
                     JSONObject jsonObject = JSON.parseObject(json);
                     final List<Landmark> mLandmarks = JSON.parseArray(jsonObject.getString("landmark"), Landmark.class);
                     Logger.t(TAG).e("get landmarks: " + mLandmarks.toString());
@@ -236,7 +236,8 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Point> landmarks = ret.getFaceLandmarks();
             String jsonString = JSON.toJSONString(landmarks);
             Logger.t(TAG).e("landmarks: " + jsonString);
-            JNIUtils.testParseJson(jsonString);
+
+            //JNIUtils.testParseJson(jsonString);
 
             //String fileName = FileUtils.getMD5(mImgPath) + ".txt";
             //FileUtils.writeFileData(mContext, fileName, jsonString);
@@ -372,7 +373,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void showProcessResult(int[] resultPixes, int w, int h) {
         Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
-        result.setPixels(resultPixes, 0, w, 0, 0,w, h);
+        //Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        result.setPixels(resultPixes, 0, w, 0, 0, w, h);
         ivImg.setImageBitmap(result);
     }
 
@@ -417,7 +419,20 @@ public class MainActivity extends AppCompatActivity {
         showProcessResult(resultPixes, w, h);
     }
 
-    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge})
+    private String searchFiles() {
+        String result = "";
+        //File[] files = new File(String.valueOf(mContext.getFilesDir())).listFiles();
+        File[] files = new File(Environment.getExternalStorageDirectory().getPath() + "/dlib").listFiles();
+        for (File file : files) {
+            result += file.getPath() + "\n";
+        }
+        if (result.equals("")){
+            result = "找不到文件!!";
+        }
+        return result;
+    }
+
+    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge, R.id.btn_file})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_img:
@@ -437,6 +452,23 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btn_edge:
                 doEdgeDetection();
+                break;
+            case R.id.btn_file:
+                //JNIUtils.testReadFile(mContext.getFilesDir().getAbsolutePath() + "/");
+                //Logger.t(TAG).e("searchFiles: \n" + searchFiles());
+                String path = Environment.getExternalStorageDirectory().getPath() + "/dlib/";
+                String result = JNIUtils.averageFaceTest(path);
+                if (result != null) {
+                    File file = new File(result);
+                    if (file.exists()) {
+                        Picasso.with(mContext).load(file)
+                                .into(ivImg);
+                    } else {
+                        Toast.makeText(mContext, "cannot create average face", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(mContext, "cannot create average face", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }

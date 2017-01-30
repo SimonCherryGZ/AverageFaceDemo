@@ -40,6 +40,13 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Reset"/>
+
+        <Button
+            android:id="@+id/btn_file"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="FILE"/>
     </LinearLayout>
 
     <LinearLayout

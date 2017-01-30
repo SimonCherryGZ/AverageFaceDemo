@@ -18,4 +18,8 @@ public class JNIUtils {
     public static native int[] doBinaryzation(int[] buf, int w, int h);
 
     public static native void testParseJson(String str);
+
+    public static native void testReadFile(String path);
+
+    public static native String averageFaceTest(String path);
 }
