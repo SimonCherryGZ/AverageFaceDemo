@@ -9,6 +9,7 @@
 /* Header for class com_simoncherry_jnidemo_JNIUtils */
 #include "jni_app.h"
 #include "json/json.h"
+#include "md5.h"
 
 #define LOG    "AverageFace-jni" // 这个是自定义的LOG的标识
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG,__VA_ARGS__) // 定义LOGD类型
@@ -581,8 +582,183 @@ JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_averageFaceT
     parameters.push_back(CV_IMWRITE_JPEG_QUALITY);
     parameters.push_back(100);
     std::string result_path = "/sdcard/average_face_result.jpg";
+
+//    std::string md5_path = MD5(result_path).toStr();
+//    LOGE("printf md5 %s", string2printf(env, md5_path));
+
     imwrite(result_path, output_mat, parameters);
     LOGE("averageFaceTest End");
+    return env->NewStringUTF(result_path.c_str());
+}
+
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    doAverageFace
+ * Signature: ([Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doAverageFace
+        (JNIEnv *env, jclass obj, jobjectArray stringArray) {
+
+    LOGE("doAverageFace Start");
+    // Dimensions of output image
+    int w = 300;
+    int h = 300;
+
+    vector<string> imageNames, ptsNames;
+
+    int stringCount = env->GetArrayLength(stringArray);
+    for (int i=0; i<stringCount; i++) {
+        jstring prompt = (jstring) (env->GetObjectArrayElement(stringArray, i));
+        std::string img_path = jstring2str(env, prompt);
+        imageNames.push_back(img_path);
+
+        const char *rawString = env->GetStringUTFChars(prompt, 0);
+        LOGE("printf path %s", rawString);
+        // Don't forget to call `ReleaseStringUTFChars` when you're done.
+        env->ReleaseStringUTFChars(prompt, rawString);
+
+        std::string txt_path = MD5(img_path).toStr();
+        txt_path = "/data/data/com.simoncherry.averageface/files/" + txt_path + ".txt";
+        ptsNames.push_back(txt_path);
+        LOGE("printf md5 %s", string2printf(env, txt_path));
+    }
+
+    if(imageNames.empty() || ptsNames.empty() || imageNames.size() != ptsNames.size()) {
+        return NULL;
+    }
+
+    // Read points
+    vector<vector<Point2f> > allPoints;
+    readPoints(ptsNames, allPoints);
+
+    int n = allPoints[0].size();
+    // Read images
+    vector<Mat> images;
+    for(size_t i = 0; i < imageNames.size(); i++){
+        Mat img = imread(imageNames[i]);
+
+        img.convertTo(img, CV_32FC3, 1/255.0);
+
+        if(!img.data) {
+            //cout << "image " << imageNames[i] << " not read properly" << endl;
+        } else {
+            images.push_back(img);
+        }
+    }
+
+    if(images.empty()) {
+        return NULL;
+    }
+
+    int numImages = images.size();
+
+    // Eye corners
+    vector<Point2f> eyecornerDst, eyecornerSrc;
+    eyecornerDst.push_back(Point2f( 0.3*w, h/3));
+    eyecornerDst.push_back(Point2f( 0.7*w, h/3));
+
+    eyecornerSrc.push_back(Point2f(0,0));
+    eyecornerSrc.push_back(Point2f(0,0));
+
+    // Space for normalized images and points.
+    vector <Mat> imagesNorm;
+    vector < vector <Point2f> > pointsNorm;
+
+    // Space for average landmark points
+    vector <Point2f> pointsAvg(allPoints[0].size());
+
+    // 8 Boundary points for Delaunay Triangulation
+    vector <Point2f> boundaryPts;
+    boundaryPts.push_back(Point2f(0,0));
+    boundaryPts.push_back(Point2f(w/2, 0));
+    boundaryPts.push_back(Point2f(w-1,0));
+    boundaryPts.push_back(Point2f(w-1, h/2));
+    boundaryPts.push_back(Point2f(w-1, h-1));
+    boundaryPts.push_back(Point2f(w/2, h-1));
+    boundaryPts.push_back(Point2f(0, h-1));
+    boundaryPts.push_back(Point2f(0, h/2));
+
+    // Warp images and trasnform landmarks to output coordinate system,
+    // and find average of transformed landmarks.
+
+    for(size_t i = 0; i < images.size(); i++) {
+        vector <Point2f> points = allPoints[i];
+
+        // The corners of the eyes are the landmarks number 36 and 45
+        eyecornerSrc[0] = allPoints[i][36];
+        eyecornerSrc[1] = allPoints[i][45];
+
+        // Calculate similarity transform
+        Mat tform;
+        similarityTransform(eyecornerSrc, eyecornerDst, tform);
+
+        // Apply similarity transform to input image and landmarks
+        Mat img = Mat::zeros(h, w, CV_32FC3);
+        warpAffine(images[i], img, tform, img.size());
+        transform( points, points, tform);
+
+        // Calculate average landmark locations
+        for ( size_t j = 0; j < points.size(); j++){
+            pointsAvg[j] += points[j] * ( 1.0 / numImages);
+        }
+
+        // Append boundary points. Will be used in Delaunay Triangulation
+        for ( size_t j = 0; j < boundaryPts.size(); j++) {
+            points.push_back(boundaryPts[j]);
+        }
+
+        pointsNorm.push_back(points);
+        imagesNorm.push_back(img);
+    }
+
+    // Append boundary points to average points.
+    for ( size_t j = 0; j < boundaryPts.size(); j++){
+        pointsAvg.push_back(boundaryPts[j]);
+    }
+
+    // Calculate Delaunay triangles
+    Rect rect(0, 0, w, h);
+    vector< vector<int> > dt;
+    calculateDelaunayTriangles(rect, pointsAvg, dt);
+
+    // Space for output image
+    Mat output_mat = Mat::zeros(h, w, CV_32FC3);
+    Size size(w,h);
+
+    // Warp input images to average image landmarks
+    for(size_t i = 0; i < numImages; i++) {
+        Mat img = Mat::zeros(h, w, CV_32FC3);
+        // Transform triangles one by one
+        for(size_t j = 0; j < dt.size(); j++) {
+            // Input and output points corresponding to jth triangle
+            vector<Point2f> tin, tout;
+            for(int k = 0; k < 3; k++) {
+                Point2f pIn = pointsNorm[i][dt[j][k]];
+                constrainPoint(pIn, size);
+
+                Point2f pOut = pointsAvg[dt[j][k]];
+                constrainPoint(pOut,size);
+
+                tin.push_back(pIn);
+                tout.push_back(pOut);
+            }
+
+            warpTriangle(imagesNorm[i], img, tin, tout);
+        }
+        // Add image intensities for averaging
+        output_mat = output_mat + img;
+    }
+
+    // Divide by numImages to get average
+    output_mat = output_mat / (double)numImages;  // Mat output_mat = Mat::zeros(h, w, CV_32FC3);
+
+    output_mat.convertTo(output_mat, CV_8UC3, 255.0);
+    vector<int> parameters;
+    parameters.push_back(CV_IMWRITE_JPEG_QUALITY);
+    parameters.push_back(100);
+    std::string result_path = "/sdcard/average_face_result.jpg";
+    imwrite(result_path, output_mat, parameters);
+    LOGE("doAverageFace End");
     return env->NewStringUTF(result_path.c_str());
 }
 

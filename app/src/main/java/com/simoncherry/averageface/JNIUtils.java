@@ -22,4 +22,6 @@ public class JNIUtils {
     public static native void testReadFile(String path);
 
     public static native String averageFaceTest(String path);
+
+    public static native String doAverageFace(String[] paths);
 }

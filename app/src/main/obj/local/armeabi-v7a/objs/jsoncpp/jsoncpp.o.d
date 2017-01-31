@@ -1,6 +1,5 @@
-D:/Simon/Works/Android/Git/AverageFace/app/src/main/obj/local/armeabi-v7a/objs/jsoncpp/jsoncpp.o: \
-  D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/jsoncpp.cpp \
-  D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/json/json.h \
+./obj/local/armeabi-v7a/objs/jsoncpp/jsoncpp.o: jni/jsoncpp.cpp \
+  jni/json/json.h \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\string \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\vector \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\map \
@@ -18,7 +17,7 @@ D:/Simon/Works/Android/Git/AverageFace/app/src/main/obj/local/armeabi-v7a/objs/j
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\cstddef \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iomanip
 
-D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/json/json.h:
+jni/json/json.h:
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\string:
 

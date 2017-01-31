@@ -142,7 +142,8 @@
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/wobble_suppression.hpp \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/ring_buffer.hpp \
   jni/jni_app.h jni/json/json.h \
-  D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stack
+  D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stack \
+  jni/md5.h
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iostream:
 
@@ -433,3 +434,5 @@ jni/jni_app.h:
 jni/json/json.h:
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stack:
+
+jni/md5.h:

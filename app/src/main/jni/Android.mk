@@ -19,7 +19,8 @@ include $(OPENCV_MK_PATH)
 endif
 
 LOCAL_MODULE := JNI_APP
-LOCAL_SRC_FILES =: jni_app.cpp
+LOCAL_SRC_FILES =: jni_app.cpp \
+                   md5.cpp
 LOCAL_LDLIBS +=  -lm -llog
 
 # include jsoncpp

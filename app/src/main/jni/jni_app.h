@@ -55,6 +55,14 @@ JNIEXPORT void JNICALL Java_com_simoncherry_averageface_JNIUtils_testReadFile
 JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_averageFaceTest
         (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    doAverageFace
+ * Signature: ([Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doAverageFace
+        (JNIEnv *, jclass, jobjectArray);
+
 #ifdef __cplusplus
 }
 #endif
