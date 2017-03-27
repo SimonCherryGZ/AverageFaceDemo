@@ -5,12 +5,14 @@ import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RawRes;
+import android.widget.Toast;
 
 import com.orhanobut.logger.Logger;
 
@@ -18,6 +20,7 @@ import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -232,6 +235,34 @@ public class FileUtils {
             Logger.t(TAG).e(e.toString());
         }
         return res;
+    }
+
+    public static void saveBitmapToFile(Context context, Bitmap bitmap, String path, String name) {
+        File file = new File(path);
+        if(!file.exists()) {
+            boolean res = file.mkdirs();
+            if(!res){
+                Toast.makeText(context, "创建目录失败", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        File imageFile = new File(file, name);
+        try {
+            imageFile.createNewFile();
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+            Toast.makeText(context, "图片已保存到 " + path, Toast.LENGTH_SHORT).show();
+
+        } catch (FileNotFoundException e) {
+            Toast.makeText(context, "图片保存失败 FileNotFoundException", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        } catch (IOException e) {
+            Toast.makeText(context, "图片保存失败 IOException", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
     }
 
     public static String getMD5(String message) {

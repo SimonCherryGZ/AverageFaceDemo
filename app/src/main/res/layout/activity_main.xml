@@ -28,25 +28,32 @@
         android:layout_marginTop="30dp">
 
         <Button
-            android:id="@+id/btn_detect"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Detect"/>
-
-        <Button
             android:id="@+id/btn_reset"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Reset"/>
+            android:text="显示原图"/>
+
+        <Button
+            android:id="@+id/btn_detect"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="关键点"/>
 
         <Button
             android:id="@+id/btn_file"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="FILE"/>
+            android:text="平均脸"/>
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="保存图片"/>
     </LinearLayout>
 
     <LinearLayout
@@ -62,21 +69,21 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="GRAY"/>
+            android:text="灰度化"/>
 
         <Button
             android:id="@+id/btn_binary"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="BINARY"/>
+            android:text="二值化"/>
 
         <Button
             android:id="@+id/btn_edge"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="EDGE"/>
+            android:text="边缘检测"/>
     </LinearLayout>
 
 </RelativeLayout>

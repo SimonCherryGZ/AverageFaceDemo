@@ -758,6 +758,7 @@ JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doAverageFac
     parameters.push_back(100);
     std::string result_path = "/sdcard/average_face_result.jpg";
     imwrite(result_path, output_mat, parameters);
+//    imwrite(result_path, output_mat);
     LOGE("doAverageFace End");
     return env->NewStringUTF(result_path.c_str());
 }

@@ -18,6 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -68,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnEdge;
     @ViewById(R.id.btn_file)
     Button btnFile;
+    @ViewById(R.id.btn_save)
+    Button btnSave;
 
     private Context mContext;
     //private Unbinder unbinder;
@@ -590,6 +593,7 @@ public class MainActivity extends AppCompatActivity {
             File file = new File(mImgPath);
             Picasso.with(mContext).load(file)
                     .fit().centerCrop()
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .into(ivImg);
         } else {
             Toast.makeText(mContext, "Image Path is null", Toast.LENGTH_SHORT).show();
@@ -624,6 +628,27 @@ public class MainActivity extends AppCompatActivity {
 
         int [] resultPixes = JNIUtils.doBinaryzation(pix, w, h);
         showProcessResult(resultPixes, w, h);
+    }
+
+    private void saveBitmapToFile() {
+        Bitmap bitmap = BitmapUtils.getViewBitmap(ivImg);
+
+        final String filePath = Environment.getExternalStorageDirectory().getAbsolutePath()
+                + File.separator + "AverageFaceDemo";
+
+        long timestamp = System.currentTimeMillis();
+        String fileName = "averageFace" + timestamp + ".png";
+
+        FileUtils.saveBitmapToFile(getApplicationContext(), bitmap, filePath, fileName);
+        callMediaScanner(filePath, fileName);
+    }
+
+    private void callMediaScanner(String filePath, String fileName) {
+        String path = filePath + "/" + fileName;
+        MediaScanner mediaScanner = new MediaScanner(getApplicationContext());
+        String[] filePaths = new String[]{path};
+        String[] mimeTypes = new String[]{MimeTypeMap.getSingleton().getMimeTypeFromExtension("png")};
+        mediaScanner.scanFiles(filePaths, mimeTypes);
     }
 
     private String searchFiles() {
@@ -676,6 +701,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Picasso.with(mContext).load(file)
+                                //.fit().centerCrop()
                                 .memoryPolicy(MemoryPolicy.NO_CACHE)
                                 .into(ivImg);
                     }
@@ -691,7 +717,7 @@ public class MainActivity extends AppCompatActivity {
         dismissDialog();
     }
 
-    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge, R.id.btn_file})
+    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge, R.id.btn_file, R.id.btn_save})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_img:
@@ -715,10 +741,11 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btn_file:
                 //JNIUtils.testReadFile(mContext.getFilesDir().getAbsolutePath() + "/");
                 //Logger.t(TAG).e("searchFiles: \n" + searchFiles());
-
                 //averageFaceTest();
-
                 startImageSelector();
+                break;
+            case R.id.btn_save:
+                saveBitmapToFile();
                 break;
         }
     }
