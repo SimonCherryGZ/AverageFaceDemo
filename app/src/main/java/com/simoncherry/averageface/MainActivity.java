@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnFile;
     @ViewById(R.id.btn_save)
     Button btnSave;
+    @ViewById(R.id.btn_pose)
+    Button btnPose;
 
     private Context mContext;
     //private Unbinder unbinder;
@@ -347,6 +349,34 @@ public class MainActivity extends AppCompatActivity {
                 runDetectAsync(mImgPath);
             }
 
+        } else {
+            Toast.makeText(mContext, "Image path is null, cannot detect face", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showHeadPose() {
+        if (mImgPath != null) {
+            String fileName = getFilesDir().getAbsolutePath() + "/" + FileUtils.getMD5(mImgPath) + ".txt";
+            Logger.t(TAG).e("txt path: " + fileName);
+
+            File temp = new File(fileName);
+            if (temp.exists()) {
+                String result = JNIUtils.showHeadPose(mImgPath);
+                if (result != null) {
+                    File file = new File(result);
+                    if (file.exists()) {
+                        Picasso.with(mContext).load(file)
+                                .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                .into(ivImg);
+                    } else {
+                        Toast.makeText(mContext, "cannot show head pose", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(mContext, "cannot show head pose", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                runDetectAsync(mImgPath);
+            }
         } else {
             Toast.makeText(mContext, "Image path is null, cannot detect face", Toast.LENGTH_SHORT).show();
         }
@@ -717,7 +747,7 @@ public class MainActivity extends AppCompatActivity {
         dismissDialog();
     }
 
-    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge, R.id.btn_file, R.id.btn_save})
+    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge, R.id.btn_file, R.id.btn_save, R.id.btn_pose})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_img:
@@ -746,6 +776,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btn_save:
                 saveBitmapToFile();
+                break;
+            case R.id.btn_pose:
+                showHeadPose();
                 break;
         }
     }

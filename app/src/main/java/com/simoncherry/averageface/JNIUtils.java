@@ -24,4 +24,6 @@ public class JNIUtils {
     public static native String averageFaceTest(String path);
 
     public static native String doAverageFace(String[] paths);
+
+    public static native String showHeadPose(String path);
 }

@@ -56,7 +56,7 @@ IplImage * changeFuckIplImage(IplImage * src) {
 
 /*
  * Class:     com_simoncherry_averageface_JNIUtils
- * Method:    doGrayScale
+ * Method:    doGrayScale 图像灰度化
  * Signature: ([III)[I
  */
 JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doGrayScale
@@ -92,7 +92,7 @@ JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doGrayScal
 
 /*
  * Class:     com_simoncherry_averageface_JNIUtils
- * Method:    doEdgeDetection
+ * Method:    doEdgeDetection 图像边缘检测
  * Signature: ([III)[I
  */
 JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doEdgeDetection
@@ -124,7 +124,7 @@ JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doEdgeDete
 
 /*
  * Class:     com_simoncherry_averageface_JNIUtils
- * Method:    doBinaryzation
+ * Method:    doBinaryzation 图像二值化
  * Signature: ([III)[I
  */
 JNIEXPORT jintArray JNICALL Java_com_simoncherry_averageface_JNIUtils_doBinaryzation
@@ -431,7 +431,7 @@ JNIEXPORT void JNICALL Java_com_simoncherry_averageface_JNIUtils_testReadFile
 
 /*
  * Class:     com_simoncherry_averageface_JNIUtils
- * Method:    averageFaceTest
+ * Method:    averageFaceTest 平均脸生成测试，path为图片目录，取目录所有图片进行合成
  * Signature: (Ljava/lang/String;)[I
  */
 JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_averageFaceTest
@@ -593,7 +593,7 @@ JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_averageFaceT
 
 /*
  * Class:     com_simoncherry_averageface_JNIUtils
- * Method:    doAverageFace
+ * Method:    doAverageFace 根据stringArray的图片路径合成平均脸
  * Signature: ([Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doAverageFace
@@ -758,8 +758,108 @@ JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doAverageFac
     parameters.push_back(100);
     std::string result_path = "/sdcard/average_face_result.jpg";
     imwrite(result_path, output_mat, parameters);
-//    imwrite(result_path, output_mat);
     LOGE("doAverageFace End");
+    return env->NewStringUTF(result_path.c_str());
+}
+
+std::vector<cv::Point3d> get_3d_model_points()
+{
+    std::vector<cv::Point3d> modelPoints;
+
+    modelPoints.push_back(cv::Point3d(0.0f, 0.0f, 0.0f)); //The first must be (0,0,0) while using POSIT
+    modelPoints.push_back(cv::Point3d(0.0f, -330.0f, -65.0f));
+    modelPoints.push_back(cv::Point3d(-225.0f, 170.0f, -135.0f));
+    modelPoints.push_back(cv::Point3d(225.0f, 170.0f, -135.0f));
+    modelPoints.push_back(cv::Point3d(-150.0f, -150.0f, -125.0f));
+    modelPoints.push_back(cv::Point3d(150.0f, -150.0f, -125.0f));
+
+    return modelPoints;
+
+}
+
+std::vector<cv::Point2d> get_2d_image_points(vector<Point2f> points)
+{
+    std::vector<cv::Point2d> image_points;
+    image_points.push_back( cv::Point2d( points[30].x, points[30].y ) );    // Nose tip
+    image_points.push_back( cv::Point2d( points[8].x, points[8].y ) );      // Chin
+    image_points.push_back( cv::Point2d( points[36].x, points[36].y ) );    // Left eye left corner
+    image_points.push_back( cv::Point2d( points[45].x, points[45].y ) );    // Right eye right corner
+    image_points.push_back( cv::Point2d( points[48].x, points[48].y ) );    // Left Mouth corner
+    image_points.push_back( cv::Point2d( points[54].x, points[54].y ) );    // Right mouth corner
+    return image_points;
+
+}
+
+cv::Mat get_camera_matrix(float focal_length, cv::Point2d center)
+{
+    cv::Mat camera_matrix = (cv::Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
+    return camera_matrix;
+}
+
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    showHeadPose 画出头部姿态的三轴
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_showHeadPose
+        (JNIEnv *env, jclass obj, jstring path) {
+    LOGE("Head Pose START");
+
+    string img_path = jstring2str(env, path);
+    string txt_path = MD5(img_path).toStr();
+    txt_path = "/data/data/com.simoncherry.averageface/files/" + txt_path + ".txt";
+
+    vector<Point2f> points;
+    ifstream ifs(txt_path.c_str());
+    float x, y;
+    while(ifs >> x >> y)
+        points.push_back(Point2f((float)x, (float)y));
+
+    Mat img = imread(img_path);
+    // 检测关键点时缩小了图片，所以这里也要按相同的方式缩小图片
+    float max_size = 512;
+    if (img.cols > max_size && img.rows > max_size) {
+        float ratio = img.cols / (float)img.rows;
+        Size dsize = Size(max_size, round(max_size / ratio));
+        resize(img, img, dsize);
+    }
+
+    // 画关键点
+    for (size_t i = 0; i < points.size(); i++){
+        cv::Point2f point =  cv::Point(points[i].x, points[i].y);
+        cv::circle(img, point, 3, cv::Scalar(0, 255, 255), -1);
+    }
+
+    // 推算Head Pose
+    std::vector<cv::Point3d> model_points = get_3d_model_points();
+    std::vector<cv::Point2d> image_points = get_2d_image_points(points);
+    double focal_length = img.cols;
+    cv::Mat camera_matrix = get_camera_matrix(focal_length, cv::Point2d(img.cols/2,img.rows/2));
+    cv::Mat rotation_vector;
+    cv::Mat rotation_matrix;
+    cv::Mat translation_vector;
+
+    cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<double>::type);
+    cv::solvePnP(model_points, image_points, camera_matrix, dist_coeffs, rotation_vector, translation_vector);
+
+    std::vector<cv::Point3d> nose_end_point3D;
+    std::vector<cv::Point2d> nose_end_point2D;
+    nose_end_point3D.push_back(cv::Point3d(0, 0, 400.0));
+    nose_end_point3D.push_back(cv::Point3d(0, 400.0, 0));
+    nose_end_point3D.push_back(cv::Point3d(400.0, 0, 0));
+
+    cv::projectPoints(nose_end_point3D, rotation_vector, translation_vector, camera_matrix, dist_coeffs, nose_end_point2D);
+    // 画x、y、z轴
+    cv::line(img, image_points[0], nose_end_point2D[0], cv::Scalar(0, 0, 255), 2);
+    cv::line(img, image_points[0], nose_end_point2D[1], cv::Scalar(0, 255, 0), 2);
+    cv::line(img, image_points[0], nose_end_point2D[2], cv::Scalar(255, 0, 0), 2);
+
+    vector<int> parameters;
+    parameters.push_back(CV_IMWRITE_JPEG_QUALITY);
+    parameters.push_back(100);
+    std::string result_path = "/sdcard/head_pose_result.jpg";
+    imwrite(result_path, img, parameters);
+    LOGE("Head Pose End");
     return env->NewStringUTF(result_path.c_str());
 }
 
