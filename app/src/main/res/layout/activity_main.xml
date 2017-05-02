@@ -15,7 +15,7 @@
         android:layout_width="240dp"
         android:layout_height="320dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="0dp"
         android:scaleType="centerCrop"
         android:src="@drawable/add_icon" />
 
@@ -24,8 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/iv_img"
-        android:layout_marginTop="30dp">
+        android:layout_above="@+id/layout_btn_middle">
 
         <Button
             android:id="@+id/btn_reset"
@@ -42,13 +41,6 @@
             android:text="关键点"/>
 
         <Button
-            android:id="@+id/btn_file"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="平均脸"/>
-
-        <Button
             android:id="@+id/btn_save"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -57,12 +49,41 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layout_btn_middle"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/layout_btn_bottom">
+
+        <Button
+            android:id="@+id/btn_pose"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="头部姿态"/>
+
+        <Button
+            android:id="@+id/btn_average"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="平均脸"/>
+
+        <Button
+            android:id="@+id/btn_swap"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="换脸"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/layout_btn_bottom"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/layout_btn_top"
-        android:layout_marginTop="3dp">
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="0dp">
 
         <Button
             android:id="@+id/btn_gray"
@@ -84,13 +105,6 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="边缘检测"/>
-
-        <Button
-            android:id="@+id/btn_pose"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="XYZ"/>
     </LinearLayout>
 
 </RelativeLayout>

@@ -1,5 +1,4 @@
-D:/Simon/Works/Android/Git/AverageFace/app/src/main/obj/local/armeabi-v7a/objs/JNI_APP/jni_app.o: \
-  D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/jni_app.cpp \
+./obj/local/armeabi-v7a/objs/JNI_APP/jni_app.o: jni/jni_app.cpp \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iostream \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\fstream \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/opencv.hpp \
@@ -142,10 +141,9 @@ D:/Simon/Works/Android/Git/AverageFace/app/src/main/obj/local/armeabi-v7a/objs/J
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/deblurring.hpp \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/wobble_suppression.hpp \
   D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/ring_buffer.hpp \
-  D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/jni_app.h \
-  D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/json/json.h \
+  jni/jni_app.h jni/json/json.h \
   D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stack \
-  D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/md5.h
+  jni/md5.h
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\iostream:
 
@@ -431,10 +429,10 @@ D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/wobb
 
 D:/Simon/Works/Android/Git/AverageFace/native/jni/include\opencv2/videostab/ring_buffer.hpp:
 
-D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/jni_app.h:
+jni/jni_app.h:
 
-D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/json/json.h:
+jni/json/json.h:
 
 D:/Simon/Software/adt-bundle-windows-x86_64-20140321/sdk/ndk-bundle/build//../sources/cxx-stl/gnu-libstdc++/4.9/include\stack:
 
-D:/Simon/Works/Android/Git/AverageFace/app/src/main/jni/md5.h:
+jni/md5.h:

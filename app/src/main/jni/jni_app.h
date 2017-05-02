@@ -65,6 +65,14 @@ JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doAverageFac
 
 /*
  * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    doFaceSwap
+ * Signature: ([Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doFaceSwap
+        (JNIEnv *, jclass, jobjectArray);
+
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
  * Method:    showHeadPose
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */

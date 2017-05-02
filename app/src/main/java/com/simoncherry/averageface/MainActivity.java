@@ -52,27 +52,31 @@ import me.nereo.multi_image_selector.MultiImageSelectorActivity;
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
-    private final static int FILE_REQUEST_CODE = 233;
-    private final static int REQUEST_IMAGE = 666;
+    private final static int REQUEST_FOR_IMAGE = 233;
+    private final static int REQUEST_FOR_AVERAGE = 666;
+    private final static int REQUEST_FOR_SWAP = 1024;
 
     @ViewById(R.id.iv_img)
     ImageView ivImg;
-    @ViewById(R.id.btn_detect)
-    Button btnDetect;
     @ViewById(R.id.btn_reset)
     Button btnReset;
+    @ViewById(R.id.btn_detect)
+    Button btnDetect;
+    @ViewById(R.id.btn_save)
+    Button btnSave;
+    @ViewById(R.id.btn_pose)
+    Button btnPose;
+    @ViewById(R.id.btn_average)
+    Button btnAverage;
+    @ViewById(R.id.btn_swap)
+    Button btnSwap;
     @ViewById(R.id.btn_gray)
     Button btnGray;
     @ViewById(R.id.btn_binary)
     Button btnBinary;
     @ViewById(R.id.btn_edge)
     Button btnEdge;
-    @ViewById(R.id.btn_file)
-    Button btnFile;
-    @ViewById(R.id.btn_save)
-    Button btnSave;
-    @ViewById(R.id.btn_pose)
-    Button btnPose;
+
 
     private Context mContext;
     //private Unbinder unbinder;
@@ -80,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
     private FaceDet mFaceDet;
     private ProgressDialog mDialog;
     private String mImgPath;
-    private int pathSize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,18 +103,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == FILE_REQUEST_CODE) {
+            if (requestCode == REQUEST_FOR_IMAGE) {
                 Uri uri = data.getData();
                 mImgPath = FileUtils.getFileAbsolutePath(this, uri);
                 showOriginalImage();
-            } else if (requestCode == REQUEST_IMAGE) {
+            } else if (requestCode == REQUEST_FOR_AVERAGE) {
                 // 获取返回的图片列表
                 List<String> paths = data.getStringArrayListExtra(MultiImageSelectorActivity.EXTRA_RESULT);
-                pathSize = paths.size();
+                int pathSize = paths.size();
                 Toast.makeText(mContext, "get " + String.valueOf(pathSize + " pics"), Toast.LENGTH_SHORT).show();
 
                 ivImg.setImageResource(R.drawable.add_icon);
-                handleImageSelectorResult(paths);
+                handleImageSelectorResult(paths, requestCode);
+            } else if (requestCode == REQUEST_FOR_SWAP) {
+                List<String> paths = data.getStringArrayListExtra(MultiImageSelectorActivity.EXTRA_RESULT);
+                ivImg.setImageResource(R.drawable.add_icon);
+                handleImageSelectorResult(paths, requestCode);
             }
         }
     }
@@ -120,10 +127,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(intent, FILE_REQUEST_CODE);
+        startActivityForResult(intent, REQUEST_FOR_IMAGE);
     }
 
-    private void handleImageSelectorResult(List<String> paths) {
+    private void handleImageSelectorResult(List<String> paths, int requestCode) {
         String[] pathArray = new String[paths.size()];
         List<String> processList = new ArrayList<>();
 
@@ -140,9 +147,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (processList.size() == 0) {
-            doAverageFace(pathArray);
+            if (requestCode == REQUEST_FOR_AVERAGE) {
+                doAverageFace(pathArray);
+            } else if (requestCode == REQUEST_FOR_SWAP) {
+                doFaceSwap(pathArray);
+            }
         } else {
-            createLandMarkTxt(processList, pathArray);
+            createLandMarkTxt(processList, pathArray, requestCode);
         }
     }
 
@@ -196,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Background
-    protected void createLandMarkTxt(List<String> imgPaths, final String[] pathArray) {
+    protected void createLandMarkTxt(List<String> imgPaths, final String[] pathArray, final int requestCode) {
         showDialog();
 
         final String targetPath = Constants.getFaceShapeModelPath();
@@ -243,7 +254,11 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                doAverageFace(pathArray);
+                if (requestCode == REQUEST_FOR_AVERAGE) {
+                    doAverageFace(pathArray);
+                } else if (requestCode == REQUEST_FOR_SWAP) {
+                    doFaceSwap(pathArray);
+                }
             }
         });
 
@@ -710,12 +725,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startImageSelector() {
+    private void startImageSelector(int code, int count) {
         MultiImageSelector.create(mContext)
                 .showCamera(false) // 是否显示相机. 默认为显示
-                .count(99) // 最大选择图片数量, 默认为9. 只有在选择模式为多选时有效
+                .count(count) // 最大选择图片数量, 默认为9. 只有在选择模式为多选时有效
                 .multi() // 多选模式, 默认模式;
-                .start(this, REQUEST_IMAGE);
+                .start(this, code);
     }
 
     @Background
@@ -747,7 +762,36 @@ public class MainActivity extends AppCompatActivity {
         dismissDialog();
     }
 
-    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray, R.id.btn_binary, R.id.btn_edge, R.id.btn_file, R.id.btn_save, R.id.btn_pose})
+    @Background
+    protected void doFaceSwap(String[] pathArray) {
+        showDialog();
+        String result = JNIUtils.doFaceSwap(pathArray);
+
+        if (result != null) {
+            final File file = new File(result);
+            if (file.exists()) {
+                mImgPath = result;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Picasso.with(mContext).load(file)
+                                .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                .into(ivImg);
+                    }
+                });
+
+            } else {
+                Toast.makeText(mContext, "cannot do face swap", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(mContext, "cannot do face swap", Toast.LENGTH_SHORT).show();
+        }
+
+        dismissDialog();
+    }
+
+    @Click({R.id.iv_img, R.id.btn_detect, R.id.btn_reset, R.id.btn_gray,
+            R.id.btn_binary, R.id.btn_edge, R.id.btn_average, R.id.btn_save, R.id.btn_pose, R.id.btn_swap})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_img:
@@ -768,17 +812,20 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btn_edge:
                 doEdgeDetection();
                 break;
-            case R.id.btn_file:
+            case R.id.btn_average:
                 //JNIUtils.testReadFile(mContext.getFilesDir().getAbsolutePath() + "/");
                 //Logger.t(TAG).e("searchFiles: \n" + searchFiles());
                 //averageFaceTest();
-                startImageSelector();
+                startImageSelector(REQUEST_FOR_AVERAGE, 99);
                 break;
             case R.id.btn_save:
                 saveBitmapToFile();
                 break;
             case R.id.btn_pose:
                 showHeadPose();
+                break;
+            case R.id.btn_swap:
+                startImageSelector(REQUEST_FOR_SWAP, 2);
                 break;
         }
     }

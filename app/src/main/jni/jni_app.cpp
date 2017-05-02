@@ -762,6 +762,116 @@ JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doAverageFac
     return env->NewStringUTF(result_path.c_str());
 }
 
+/*
+ * Class:     com_simoncherry_averageface_JNIUtils
+ * Method:    doFaceSwap
+ * Signature: ([Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_simoncherry_averageface_JNIUtils_doFaceSwap
+        (JNIEnv *env, jclass obj, jobjectArray stringArray) {
+    LOGE("doFaceSwap Start");
+    int stringCount = env->GetArrayLength(stringArray);
+    if (stringCount < 2) {
+        return NULL;
+    }
+
+    vector<string> imageNames, ptsNames;
+
+    for (int i=0; i<2; i++) {
+        jstring prompt = (jstring) (env->GetObjectArrayElement(stringArray, i));
+        std::string img_path = jstring2str(env, prompt);
+        imageNames.push_back(img_path);
+
+        const char *rawString = env->GetStringUTFChars(prompt, 0);
+        LOGE("printf path %s", rawString);
+        // Don't forget to call `ReleaseStringUTFChars` when you're done.
+        env->ReleaseStringUTFChars(prompt, rawString);
+
+        std::string txt_path = MD5(img_path).toStr();
+        txt_path = "/data/data/com.simoncherry.averageface/files/" + txt_path + ".txt";
+        ptsNames.push_back(txt_path);
+        LOGE("printf md5 %s", string2printf(env, txt_path));
+    }
+
+    if(imageNames.empty() || ptsNames.empty() || imageNames.size() != ptsNames.size()) {
+        return NULL;
+    }
+
+    // Read points
+    vector<vector<Point2f> > allPoints;
+    readPoints(ptsNames, allPoints);
+
+    vector<Point2f> points1 = allPoints[0];
+    vector<Point2f> points2 = allPoints[1];
+
+    Mat img1 = imread(imageNames[0]);
+    Mat img2 = imread(imageNames[1]);
+    Mat img1Warped = img2.clone();
+
+    //convert Mat to float data type
+    img1.convertTo(img1, CV_32F);
+    img1Warped.convertTo(img1Warped, CV_32F);
+
+    // Find convex hull
+    vector<Point2f> hull1;
+    vector<Point2f> hull2;
+    vector<int> hullIndex;
+
+    convexHull(points2, hullIndex, false, false);
+
+    for(int i = 0; i < hullIndex.size(); i++)
+    {
+        hull1.push_back(points1[hullIndex[i]]);
+        hull2.push_back(points2[hullIndex[i]]);
+    }
+
+    // Find delaunay triangulation for points on the convex hull
+    vector< vector<int> > dt;
+    Rect rect(0, 0, img1Warped.cols, img1Warped.rows);
+    calculateDelaunayTriangles(rect, hull2, dt);
+
+    // Apply affine transformation to Delaunay triangles
+    for(size_t i = 0; i < dt.size(); i++)
+    {
+        vector<Point2f> t1, t2;
+        // Get points for img1, img2 corresponding to the triangles
+        for(size_t j = 0; j < 3; j++)
+        {
+            t1.push_back(hull1[dt[i][j]]);
+            t2.push_back(hull2[dt[i][j]]);
+        }
+
+        warpTriangle(img1, img1Warped, t1, t2);
+    }
+
+    // Calculate mask
+    vector<Point> hull8U;
+    for(int i = 0; i < hull2.size(); i++)
+    {
+        Point pt(hull2[i].x, hull2[i].y);
+        hull8U.push_back(pt);
+    }
+
+    Mat mask = Mat::zeros(img2.rows, img2.cols, img2.depth());
+    fillConvexPoly(mask,&hull8U[0], hull8U.size(), Scalar(255,255,255));
+
+    // Clone seamlessly.
+    Rect r = boundingRect(hull2);
+    Point center = (r.tl() + r.br()) / 2;
+
+    Mat output;
+    img1Warped.convertTo(img1Warped, CV_8UC3);
+    seamlessClone(img1Warped,img2, mask, center, output, NORMAL_CLONE);
+
+    vector<int> parameters;
+    parameters.push_back(CV_IMWRITE_JPEG_QUALITY);
+    parameters.push_back(100);
+    std::string result_path = "/sdcard/face_swap_result.jpg";
+    imwrite(result_path, output, parameters);
+    LOGE("doAverageFace End");
+    return env->NewStringUTF(result_path.c_str());
+}
+
 std::vector<cv::Point3d> get_3d_model_points()
 {
     std::vector<cv::Point3d> modelPoints;
