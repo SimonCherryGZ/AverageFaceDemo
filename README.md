@@ -6,8 +6,9 @@ Android平均脸合成应用。
 基于 
 ----------------------------------- 
 * [dlib-android](https://github.com/tzutalin/dlib-android) 提供Android平台可用的Dlib库。
-* [LearnOpenCV.com](https://github.com/spmallick/learnopencv/tree/master/FaceAverage) 的平均脸合成算法。
+* [LearnOpenCV.com](http://www.learnopencv.com/average-face-opencv-c-python-tutorial/) 的平均脸合成算法。
 * [LearnOpenCV.com](http://www.learnopencv.com/head-pose-estimation-using-opencv-and-dlib/) 的头部姿态算法。
+* [LearnOpenCV.com](http://www.learnopencv.com/face-swap-using-opencv-c-python/) 的换脸算法。
 
 应用截图 
 -----------------------------------
@@ -19,6 +20,9 @@ Android平均脸合成应用。
 ![image](https://github.com/SimonCherryGZ/AverageFaceDemo/raw/master/screenshots/3.png)
 ### 2017/05/01 -- 显示头部姿态
 ![image](https://github.com/SimonCherryGZ/AverageFaceDemo/raw/master/screenshots/4.png)
+### 2017/05/02 -- 换脸
+![image](https://github.com/SimonCherryGZ/AverageFaceDemo/raw/master/screenshots/5.png)
+![image](https://github.com/SimonCherryGZ/AverageFaceDemo/raw/master/screenshots/6.png)
 
 依赖库 
 -----------------------------------  
