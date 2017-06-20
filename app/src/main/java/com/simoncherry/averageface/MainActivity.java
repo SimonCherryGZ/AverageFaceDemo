@@ -171,13 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
         final String targetPath = Constants.getFaceShapeModelPath();
         if (!new File(targetPath).exists()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MainActivity.this, "Copy landmark model to " + targetPath, Toast.LENGTH_SHORT).show();
-                }
-            });
-            FileUtils.copyFileFromRawToOthers(getApplicationContext(), R.raw.shape_predictor_68_face_landmarks, targetPath);
+            throw new RuntimeException("找不到shape_predictor_68_face_landmarks.dat");
         }
         // Init
         if (mFaceDet == null) {
@@ -212,13 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
         final String targetPath = Constants.getFaceShapeModelPath();
         if (!new File(targetPath).exists()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MainActivity.this, "Copy landmark model to " + targetPath, Toast.LENGTH_SHORT).show();
-                }
-            });
-            FileUtils.copyFileFromRawToOthers(getApplicationContext(), R.raw.shape_predictor_68_face_landmarks, targetPath);
+            throw new RuntimeException("找不到shape_predictor_68_face_landmarks.dat");
         }
         // Init
         if (mFaceDet == null) {
@@ -403,13 +391,7 @@ public class MainActivity extends AppCompatActivity {
 
         final String targetPath = Constants.getFaceShapeModelPath();
         if (!new File(targetPath).exists()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(MainActivity.this, "Copy landmark model to " + targetPath, Toast.LENGTH_SHORT).show();
-                }
-            });
-            FileUtils.copyFileFromRawToOthers(getApplicationContext(), R.raw.shape_predictor_68_face_landmarks, targetPath);
+            throw new RuntimeException("找不到shape_predictor_68_face_landmarks.dat");
         }
         // Init
         if (mFaceDet == null) {
@@ -514,51 +496,6 @@ public class MainActivity extends AppCompatActivity {
 
         return new BitmapDrawable(getResources(), bm);
     }
-
-//    protected BitmapDrawable drawRect(String path, ArrayList<Point> landmarks, int color) {
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inSampleSize = 1;
-//        Bitmap bm = BitmapFactory.decodeFile(path, options);
-//        android.graphics.Bitmap.Config bitmapConfig = bm.getConfig();
-//        // set default bitmap config if none
-//        if (bitmapConfig == null) {
-//            bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
-//        }
-//        // resource bitmaps are imutable,
-//        // so we need to convert it to mutable one
-//        bm = bm.copy(bitmapConfig, true);
-//        int width = bm.getWidth();
-//        int height = bm.getHeight();
-//        // By ratio scale
-//        float aspectRatio = bm.getWidth() / (float) bm.getHeight();
-//
-//        final int MAX_SIZE = 512;
-//        int newWidth = MAX_SIZE;
-//        int newHeight = MAX_SIZE;
-//        float resizeRatio = 1;
-//        newHeight = Math.round(newWidth / aspectRatio);
-//        if (bm.getWidth() > MAX_SIZE && bm.getHeight() > MAX_SIZE) {
-//            Log.d(TAG, "Resize Bitmap");
-//            bm = getResizedBitmap(bm, newWidth, newHeight);
-//            resizeRatio = (float) bm.getWidth() / (float) width;
-//            Log.d(TAG, "resizeRatio " + resizeRatio);
-//        }
-//
-//        // Create canvas to draw
-//        Canvas canvas = new Canvas(bm);
-//        Paint paint = new Paint();
-//        paint.setColor(color);
-//        paint.setStrokeWidth(2);
-//        paint.setStyle(Paint.Style.STROKE);
-//
-//        for (Point point : landmarks) {
-//            int pointX = (int) (point.x * resizeRatio);
-//            int pointY = (int) (point.y * resizeRatio);
-//            canvas.drawCircle(pointX, pointY, 2, paint);
-//        }
-//
-//        return new BitmapDrawable(getResources(), bm);
-//    }
 
     protected BitmapDrawable drawRectWithLandmark(String path, List<Landmark> landmarks, int color) {
         BitmapFactory.Options options = new BitmapFactory.Options();
